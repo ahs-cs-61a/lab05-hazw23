@@ -24,7 +24,7 @@ reminders:
 - to import files and packages: ```python3 -m pip install -e .```
 - to run main.py: ```python3 main.py```
 - for individual tests: ```python3 -m pytest -s tests/test.py -k test_name_of_function```
-- for all tests: ``````
+- for all tests: ```python3 -m pytest -s tests/test.py```
 - refer to lab00 setup description for helppython3 -m pytest -s tests/test.py
 - don't forget to push to GitHub from Codespaces and submit turn-in in GradeScope
 
