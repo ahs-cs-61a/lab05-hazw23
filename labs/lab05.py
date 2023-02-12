@@ -355,6 +355,7 @@ class FreeChecking(Account): # q8
 
     "*** YOUR CODE HERE ***"
     def withdraw(self, amount):
-        if self.free_withdrawals > 0: self.free_withdrawals -= 1
+        self.free_withdrawals -= 1
         if self.free_withdrawals >= 0: return Account.withdraw(self, amount)
-        return Account.withdraw(self, amount+self.withdraw_fee)
+        self.balance -= self.withdraw_fee
+        return Account.withdraw(self, amount)
