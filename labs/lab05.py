@@ -34,20 +34,30 @@ class Keyboard: # q1
     """
     def __init__(self, *args):
         """YOUR CODE HERE"""
-
-
+        self.buttons = {}
+        for i in args:
+            self.buttons[i.pos] = i
+        
     def press(self, info):
         """Takes in a position of the button pressed, and
         returns that button's output."""
 
         """YOUR CODE HERE"""
-
+        if info in self.buttons:
+            self.buttons[info].times_pressed += 1
+            return self.buttons[info].key
+        return ''
 
     def typing(self, typing_input):
         """Takes in a list of positions of buttons pressed, and
         returns the total output."""
 
         """YOUR CODE HERE"""
+        list = ''
+        for item in typing_input:
+            list += self.press(item)
+        return list
+
 
 
 # lab04: https://inst.eecs.berkeley.edu/~cs61a/su22/lab/lab04/
@@ -82,18 +92,29 @@ class Minty:
 
     def create(self, type):
         "*** YOUR CODE HERE ***"
-
+        return Coin(self.year, type)
+        
     def update(self):
         "*** YOUR CODE HERE ***"
+        self.year = Minty.present_year
+
 
 class Coin: # q2
-    cents = 50
 
     def __init__(self, year, type):
         "*** YOUR CODE HERE ***"
+        self.year = year
+        self.type = type
+        if type == 'Penny': self.cents = 1
+        if type == 'Nickel': self.cents = 5
+        if type == 'Dime': self.cents = 10
+        if type == 'Quarter': self.cents = 25
 
     def worth(self):
         "*** YOUR CODE HERE ***"
+        if (Minty.present_year - self.year) > 50: return Minty.present_year - self.year - 50 + self.cents
+        return self.cents
+
 
 
 # hw04: https://inst.eecs.berkeley.edu/~cs61a/su22/hw/hw04/
@@ -118,10 +139,22 @@ class SmartFridge: # q3
     """
     def __init__(self):
         self.items = {}
+
     def add_item(self, item, quantity):
         "*** YOUR CODE HERE ***"
+        if item in self.items: self.items[item] += quantity
+        else: self.items[item] = quantity
+        return 'I now have ' + str(self.items[item]) + ' ' + item
+
     def use_item(self, item, quantity):
         "*** YOUR CODE HERE ***"
+        if quantity >= self.items[item]: 
+            self.items[item] = 0
+            return 'Oh no, we need more ' + item + '!'
+        else: 
+            self.items[item] -= quantity
+            return 'I have ' + str(self.items[item]) + ' ' + item + ' left'
+
 
 
 class VendingMachine: # q4
@@ -162,6 +195,31 @@ class VendingMachine: # q4
     'Here is your soda.'
     """
     "*** YOUR CODE HERE ***"
+    def __init__(self, item, price):
+        self.item = item
+        self.stock = 0
+        self.price = price
+        self.kaching = 0
+
+    def vend(self):
+        if self.stock == 0: return('Nothing left to vend. Please restock.')
+        if self.kaching < self.price: return('Please update your balance with $' + str(self.price-self.kaching) + ' more funds.')
+        self.stock -= 1
+        back = self.kaching-self.price
+        moola = self.kaching
+        self.kaching = 0
+        if moola > self.price: return('Here is your ' + self.item + ' and $' + str(back) + ' change.')
+        return('Here is your ' + self.item + '.')
+
+    def add_funds(self, money):
+        if self.stock == 0: return('Nothing left to vend. Please restock. Here is your $' + str(money) + '.')
+        self.kaching += money
+        return ('Current balance: $' + str(self.kaching))
+
+    def restock(self, num):
+        self.stock += num
+        return('Current ' + self.item + ' stock: ' + str(self.stock))
+
 
     
 # disc06: https://inst.eecs.berkeley.edu/~cs61a/su22/disc/disc06/
@@ -178,16 +236,18 @@ class Pet():
 
 class Cat(Pet): # q5
 
-    def __init__(self, name, owner, lives=9):
+    def __init__(self, name, owner):
         "*** YOUR CODE HERE ***"
+        super().__init__(name, owner)
+        self.lives = 9
 
     def talk(self):
         """Print out a cat's greeting.
-
         >>> Cat('Thomas', 'Tammy').talk()
         Thomas says meow!
         """
         "*** YOUR CODE HERE ***"
+        print(self.name + ' says meow!')
 
     def lose_life(self):
         """Decrements a cat's life by 1. When lives reaches zero,
@@ -195,13 +255,14 @@ class Cat(Pet): # q5
         reached zero, print 'This cat has no more lives to lose.'
         """
         "*** YOUR CODE HERE ***"
+        if self.lives == 0:
+            self.is_alive = False
+            print('This cat has no more lives to lose')
+        else: self.lives -=1
 
 
-class _______: # q6
+class NoisyCat(Cat): # q6
     """A Cat that repeats things twice."""
-    def __init__(self, name, owner, lives=9):
-        # Is this method necessary? Why or why not?
-        "*** YOUR CODE HERE ***"
 
     def talk(self):
         """Talks twice as much as a regular cat.
@@ -210,6 +271,9 @@ class _______: # q6
         Magic says meow!
         """
         "*** YOUR CODE HERE ***"
+        super().talk()
+        super().talk()
+
 
 
 # lab05: https://inst.eecs.berkeley.edu/~cs61a/su22/lab/lab05/
@@ -255,6 +319,12 @@ class Account: # q7
         """Return the number of years until balance would grow to amount."""
         assert self.balance > 0 and amount > 0 and self.interest > 0
         "*** YOUR CODE HERE ***"
+        years = 0
+        current = self.balance
+        while current < amount:
+            current *= 1 + self.interest
+            years += 1
+        return years
 
 
 class FreeChecking(Account): # q8
@@ -284,3 +354,7 @@ class FreeChecking(Account): # q8
     free_withdrawals = 2
 
     "*** YOUR CODE HERE ***"
+    def withdraw(self, amount):
+        if self.free_withdrawals > 0: self.free_withdrawals -= 1
+        if self.free_withdrawals >= 0: return Account.withdraw(self, amount)
+        return Account.withdraw(self, amount+self.withdraw_fee)
